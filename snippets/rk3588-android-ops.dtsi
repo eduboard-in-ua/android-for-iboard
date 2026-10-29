@@ -1,5 +1,5 @@
 / {
-    model = "Rockchip RK3588 Android OPS Board";
+    model = "iBoard RK3588 Android OPS Board";
     compatible = "rockchip,rk3588-ops", "rockchip,rk3588";
 
     // OPS电源时序节点

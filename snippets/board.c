@@ -7,7 +7,7 @@
 
 __weak int rk_board_init(void)
 {
-    printf("RK3588 OPS U-Boot Board Init Start\n");
+    printf("iBoard RK3588 OPS U-Boot Board Init Start\n");
 
     // 1. OPS电源控制GPIO初始化（金手指供电使能脚）
     // GPIO4_D5 电源使能引脚，上电拉高
@@ -30,7 +30,7 @@ __weak int rk_board_init(void)
         printf("No OPS Slot Detected\n");
     }
 
-    printf("RK3588 OPS Board Init Complete\n");
+    printf("iBoard RK3588 OPS Board Init Complete\n");
     return 0;
 }
 
