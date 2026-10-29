@@ -1,0 +1,51 @@
+/ {
+    model = "Rockchip RK3588 Android OPS Board";
+    compatible = "rockchip,rk3588-ops", "rockchip,rk3588";
+
+    // OPS电源时序节点
+    ops_power: ops-power {
+        gpios = <&gpio4 RK_PD5 GPIO_ACTIVE_HIGH>;
+        status = "okay";
+    };
+
+    // 风扇温控PWM
+    fan: pwm-fan {
+        compatible = "pwm-fan";
+        #cooling-cells = <2>;
+        pwms = <&pwm9 0 50000 0>;
+        cooling-levels = <0 60 120 180 255>;
+        rockchip,temp-trips = <
+            50000 1
+            60000 3
+            70000 5
+        >;
+    };
+};
+
+// 千兆网口使能
+&gmac1 {
+    status = "okay";
+    phy-supply = <&vcc_3v3>;
+    phy-mode = "rgmii";
+    pinctrl-names = "default";
+    pinctrl-0 = <&gmac1m1_rgmii_pins>;
+};
+
+// HDMI0 主显示输出（OPS大屏默认）
+&hdmi0 {
+    status = "okay";
+    rockchip,hdmi20;
+};
+
+// UART2调试串口
+&uart2 {
+    status = "okay";
+    pinctrl-names = "default";
+    pinctrl-0 = <&uart2m1_xfer>;
+};
+
+// SATA硬盘
+&sata0 {
+    u-boot,dm-pre-reloc;
+    status = "okay";
+};
