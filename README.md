@@ -10,6 +10,7 @@ U-Boot bootloader snippets and Android boot parameters for the iBoard RK3588 OPS
 | `snippets/rk3588-android-ops.dtsi` | Device Tree fragment for power, fan, Ethernet, HDMI, UART, and SATA. |
 | `snippets/boot-env.h` | U-Boot environment variables and Android boot parameters. |
 | `snippets/startup.S` | Assembly fragment for initial stack setup and transition to board initialization. |
+| `scripts/check.sh` | Repeatable local checks for whitespace, branding, environment formatting, and startup assembly syntax. |
 
 ## Integration
 
@@ -34,6 +35,33 @@ The project name, board initialization messages, and Device Tree `model` identif
 
 The fan property must be checked against the BSP in use. The [mainline Linux PWM fan binding](https://github.com/torvalds/linux/blob/master/Documentation/devicetree/bindings/hwmon/pwm-fan.yaml) uses thermal-zone cooling maps; it does not define `rockchip,temp-trips`. The [Rockchip RK3588 pinctrl driver](https://github.com/rockchip-linux/u-boot/blob/next-dev/drivers/pinctrl/rockchip/pinctrl-rk3588.c) describes the SoC GPIO banks.
 
+## Reference implementations
+
+These references help identify the integration points. Their board settings must be matched to the actual iBoard BSP and schematic before use.
+
+| Reference | Relevant pattern |
+| --- | --- |
+| [Rockchip U-Boot, `next-dev`](https://github.com/rockchip-linux/u-boot/tree/next-dev) | Vendor Android boot command, board hooks, and Rockchip platform initialization. |
+| [Rockchip kernel, `develop-5.10`](https://github.com/rockchip-linux/kernel/tree/develop-5.10) | RK3588 Device Trees and the vendor driver consuming `rockchip,temp-trips`. |
+| [Radxa Android build guide](https://docs.radxa.com/en/rock5/rock5t/other-os/android/low-level-dev/build-system) | A manifest coordinates U-Boot, kernel, Android device configuration, and AOSP revisions for a specific board. |
+
+Two checks against these vendor trees need resolution before integration:
+
+- The [Rockchip Android command](https://github.com/rockchip-linux/u-boot/blob/next-dev/cmd/boot_android.c#L18-L54) requires an interface and device argument. The [standard vendor environment](https://github.com/rockchip-linux/u-boot/blob/next-dev/include/configs/rockchip-common.h) supplies them through `${devtype}` and `${devnum}`. The current `bootcmd=boot_android; reset` is incomplete for that implementation. Select the arguments and fallback flow from the target BSP.
+- The [Rockchip PWM fan driver](https://github.com/rockchip-linux/kernel/blob/develop-5.10/drivers/hwmon/pwm-fan.c) sets the maximum state to the number of cooling levels minus one and rejects larger states. Our five-level table references state `5`, which is outside `0..4` for that driver. The [Toybrick RK3588 example](https://github.com/rockchip-linux/kernel/blob/develop-5.10/arch/arm64/boot/dts/rockchip/rk3588-toybrick-x0.dtsi) uses the same property with six levels. Confirm the target driver and intended fan curve before changing either table.
+
+Fan thermal policy is implemented by the kernel driver. Keep kernel thermal configuration in the matching kernel Device Tree and integrate only bootloader-supported nodes into U-Boot. The C board hooks, startup assembly, and environment fragments belong to the selected U-Boot tree.
+
 ## Static validation
 
-The environment header passes a C syntax check with the external environment macros supplied as test placeholders. The startup assembly passes AArch64 syntax checks for both SPL and non-SPL paths with test stack constants. These checks cover the fragments' syntax; board initialization, Device Tree integration, and boot behavior require the actual BSP and hardware.
+Run from the repository root:
+
+```sh
+./scripts/check.sh
+```
+
+The script also works when invoked by its full path from another directory. It requires Git and Clang with the AArch64 assembler backend; the temporary C probe runs on the host. Standard POSIX shell utilities are used, and all temporary files are removed on completion or interruption.
+
+The command checks committed changes from the import commit plus staged and unstaged whitespace, iBoard messages and Device Tree model, the environment header's C syntax and NUL-separated `key=value` format, and both SPL and non-SPL assembly paths. External environment macros and stack constants are supplied as test placeholders.
+
+Exit status `0` means these static checks passed. The final integration notice remains relevant: the checks do not validate Android command semantics against a real BSP, GPIO assignments, kernel Device Tree bindings, board initialization, or boot behavior. The command does not download dependencies, build a firmware image, or access hardware.
