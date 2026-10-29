@@ -6,4 +6,4 @@
     "bootargs=earlyprintk console=ttyFIQ0 loglevel=7 rootwait rw androidboot.hardware=rk3588ops\0" \
     "bootcmd=boot_android; reset\0" \
     "autostart=yes\0" \
-    "bootdelay=0\0"  /* 0秒延时，上电自动开机，适配OPS一体机 */
+    "bootdelay=0\0"  /* Zero boot delay for automatic startup on OPS all-in-one systems. */

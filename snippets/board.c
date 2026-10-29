@@ -9,23 +9,23 @@ __weak int rk_board_init(void)
 {
     printf("iBoard RK3588 OPS U-Boot Board Init Start\n");
 
-    // 1. OPS电源控制GPIO初始化（金手指供电使能脚）
-    // GPIO4_D5 电源使能引脚，上电拉高
+    // 1. Initialize the OPS power-control GPIO (edge-connector power enable).
+    // Drive the GPIO4_D5 power-enable pin high at startup.
     gpio_request(157, "OPS_POWER_EN");
     gpio_direction_output(157, 1);
     mdelay(20);
 
-    // 2. 风扇PWM控制脚初始化
+    // 2. Initialize the fan PWM control pin.
     gpio_request(160, "PWM_FAN");
     gpio_direction_output(160, 0);
 
-    // 3. 调试串口打印
+    // 3. Print serial-console diagnostics.
     debug("OPS Power Pin Init OK, GPIO157 = HIGH\n");
 
-    // 4. 读取OPS硬件检测引脚（识别OPS金手指在位）
+    // 4. Read the detection pin to check whether the OPS module is present.
     if(gpio_get_value(158)){
         printf("OPS Module Detected\n");
-        env_set("hdmi_default", "hdmi0"); // 默认HDMI0输出
+        env_set("hdmi_default", "hdmi0"); // Default to HDMI0 output.
     }else{
         printf("No OPS Slot Detected\n");
     }
@@ -34,7 +34,7 @@ __weak int rk_board_init(void)
     return 0;
 }
 
-// U-Boot启动前期调试打印DDR、时钟
+// Print DDR and clock diagnostics during early U-Boot startup.
 void board_init_f(ulong dummy)
 {
     debug("==== RK3588 SPL Preloader Init ====\n");
@@ -43,5 +43,5 @@ void board_init_f(ulong dummy)
     debug("DDR Detect Success, DRAM Size: %dGB\n", gd->ram_size / 1024 / 1024 / 1024);
     serial_init();
     debug("UART Debug Console Ready\n");
-    spl_hotkey_init(); // 检测Recovery下载按键
+    spl_hotkey_init(); // Check the recovery/download button.
 }

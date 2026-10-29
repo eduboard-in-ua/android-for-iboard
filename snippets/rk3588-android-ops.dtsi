@@ -2,13 +2,13 @@
     model = "iBoard RK3588 Android OPS Board";
     compatible = "rockchip,rk3588-ops", "rockchip,rk3588";
 
-    // OPS电源时序节点
+    // OPS power-sequencing node.
     ops_power: ops-power {
         gpios = <&gpio4 RK_PD5 GPIO_ACTIVE_HIGH>;
         status = "okay";
     };
 
-    // 风扇温控PWM
+    // Fan temperature control through PWM.
     fan: pwm-fan {
         compatible = "pwm-fan";
         #cooling-cells = <2>;
@@ -22,7 +22,7 @@
     };
 };
 
-// 千兆网口使能
+// Enable Gigabit Ethernet.
 &gmac1 {
     status = "okay";
     phy-supply = <&vcc_3v3>;
@@ -31,20 +31,20 @@
     pinctrl-0 = <&gmac1m1_rgmii_pins>;
 };
 
-// HDMI0 主显示输出（OPS大屏默认）
+// HDMI0 primary display output (default for OPS displays).
 &hdmi0 {
     status = "okay";
     rockchip,hdmi20;
 };
 
-// UART2调试串口
+// UART2 debug console.
 &uart2 {
     status = "okay";
     pinctrl-names = "default";
     pinctrl-0 = <&uart2m1_xfer>;
 };
 
-// SATA硬盘
+// SATA storage.
 &sata0 {
     u-boot,dm-pre-reloc;
     status = "okay";

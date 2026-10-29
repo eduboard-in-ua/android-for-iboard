@@ -1,6 +1,6 @@
 reset:
 #if defined(CONFIG_SPL_BUILD)
-    /* 设置栈，16字节对齐 */
+    /* Set up a stack aligned to 16 bytes. */
     ldr	x0, =(CONFIG_SPL_STACK)
 #else
     ldr	x0, =(CONFIG_SYS_INIT_SP_ADDR)
